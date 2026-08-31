@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Алисе — 1 год · Список желанных подарков</title>
+<meta name="description" content="Алисе исполняется 1 год! Выберите подарок из списка и нажмите «Подарить», чтобы забронировать его за собой.">
+<meta name="theme-color" content="#FDF3E7">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Алисе — 1 год · Список желанных подарков">
+<meta property="og:description" content="Выберите подарок для Алисы — мы будем рады каждому сюрпризу.">
+<meta property="og:image" content="assets/img/hero-1280.jpg">
+<meta property="og:locale" content="ru_RU">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="assets/img/hero-mobile-560.jpg" media="(max-width: 559px)">
+<link rel="preload" as="image" href="assets/img/hero-1280.jpg" media="(min-width: 900px)">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='86'>🎀</text></svg>">
+</head>
+<body>
+<!-- Общий SVG-спрайт: иконки и иллюстрации подарков -->
+<script src="assets/js/sprite.js"></script>
+
+<!-- Illustrated page background (fixed, non-interactive) -->
+<div class="page-bg" aria-hidden="true"></div>
+
+<!-- ══════════ Header ══════════ -->
+<header class="site-header" id="top">
+  <div class="container site-header__inner">
+    <a class="brand" href="#top" aria-label="Алисе — 1 год, на главную">
+      <svg class="brand__mark" aria-hidden="true"><use href="#brand-mark"/></svg>
+      <span class="brand__text"><b>Алиса</b><span>1 годик</span></span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <a class="nav__link" href="#gifts">Подарки</a>
+      <svg class="nav__heart" width="16" height="16" aria-hidden="true"><use href="#i-heart"/></svg>
+      <a class="nav__link" href="#how">Как это работает</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ══════════ Hero ══════════ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__bg" data-parallax="0.12" aria-hidden="true"></div>
+    <div class="hero__scrim" aria-hidden="true"></div>
+
+    <div class="hero__decor" aria-hidden="true">
+      <div class="deco deco--1" data-parallax="-0.12"><svg viewBox="0 0 100 60"><use href="#d-cloud"/></svg></div>
+      <div class="deco deco--2" data-parallax="-0.30"><svg viewBox="0 0 40 40"><use href="#d-star"/></svg></div>
+      <div class="deco deco--3" data-parallax="-0.22"><svg viewBox="0 0 60 50"><use href="#d-butterfly"/></svg></div>
+      <div class="deco deco--4" data-parallax="-0.40"><svg viewBox="0 0 40 40"><use href="#d-star"/></svg></div>
+      <div class="deco deco--5" data-parallax="-0.16"><svg viewBox="0 0 50 80"><use href="#d-balloon"/></svg></div>
+    </div>
+
+    <div class="container">
+      <div class="hero__inner">
+        <p class="hero__eyebrow">
+          <svg width="16" height="16" aria-hidden="true"><use href="#i-sparkle"/></svg>
+          ПЕРВЫЙ ДЕНЬ РОЖДЕНИЯ
+        </p>
+        <h1 class="hero__title" id="hero-title" data-split>Алисе <svg class="hero__heart" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg> 1 год</h1>
+        <p class="hero__subtitle">Список желанных подарков</p>
+        <p class="hero__lead">Выберите подарок для Алисы — мы будем рады каждому сюрпризу.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary btn--lg" href="#gifts">
+            <svg width="20" height="20" aria-hidden="true"><use href="#i-gift"/></svg>
+            Смотреть подарки
+          </a>
+          <span class="hero__cue">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-arrow-down"/></svg>
+            20 идей
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════ Gifts ══════════ -->
+  <section class="section section--gifts" id="gifts" aria-labelledby="gifts-title">
+    <div class="container">
+      <header class="section__head">
+        <h2 class="section__title" id="gifts-title">
+          <svg width="56" height="22" aria-hidden="true"><use href="#i-leaf-l"/></svg>
+          Подарки для Алисы
+          <svg width="56" height="22" aria-hidden="true" style="transform:scaleX(-1)"><use href="#i-leaf-l"/></svg>
+        </h2>
+        <p class="section__sub">Нажмите «Подарить» и оставьте своё имя</p>
+
+        <div class="progress reveal">
+          <p class="progress__row">
+            <span>Уже выбрано</span>
+            <span><b id="progress-count">0</b> из <span id="progress-total">20</span></span>
+          </p>
+          <div class="progress__track" role="progressbar" aria-labelledby="gifts-title"
+               aria-valuemin="0" aria-valuemax="20" aria-valuenow="0" id="progress-track">
+            <div class="progress__bar" id="progress-bar"></div>
+          </div>
+        </div>
+      </header>
+
+      <p class="gifts-status" id="gifts-status" role="status" aria-live="polite" hidden></p>
+
+      <ul class="gift-grid" id="gift-grid">
+        <!-- карточки приходят с сервера: GET /api/state -->
+      </ul>
+
+      <noscript>
+        <p class="gifts-status">
+          Для просмотра списка подарков включите JavaScript — или напишите нам напрямую,
+          мы подскажем, что ещё свободно.
+        </p>
+      </noscript>
+    </div>
+  </section>
+
+  <!-- ══════════ How it works ══════════ -->
+  <section class="section" id="how" aria-labelledby="how-title">
+    <div class="container">
+      <header class="section__head">
+        <h2 class="section__title" id="how-title">Как это работает</h2>
+        <p class="section__sub">Три простых шага — и подарок закреплён за вами</p>
+      </header>
+      <ul class="steps">
+        <li class="step reveal">
+          <span class="step__n">1</span>
+          <span class="step__icon"><svg width="28" height="28" aria-hidden="true"><use href="#i-cursor"/></svg></span>
+          <h3>Выберите подарок</h3>
+          <p>Пролистайте список и найдите то, что вам по душе.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__n">2</span>
+          <span class="step__icon"><svg width="28" height="28" aria-hidden="true"><use href="#i-pen"/></svg></span>
+          <h3>Оставьте имя</h3>
+          <p>Короткая форма — только имя и, если хотите, пара тёплых слов.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__n">3</span>
+          <span class="step__icon"><svg width="28" height="28" aria-hidden="true"><use href="#i-gift"/></svg></span>
+          <h3>Подарок ваш</h3>
+          <p>Он сразу отмечается как забронированный — никто не повторится.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- ══════════ Footer ══════════ -->
+<footer class="site-footer">
+  <div class="container">
+    <h2 class="site-footer__title">Спасибо, что вы рядом</h2>
+    <p>Самый лучший подарок — это вы на нашем празднике.</p>
+    <p class="site-footer__hearts">
+      <svg width="22" height="22" aria-hidden="true"><use href="#i-heart"/></svg>
+      <svg width="22" height="22" aria-hidden="true"><use href="#i-heart"/></svg>
+      <svg width="22" height="22" aria-hidden="true"><use href="#i-heart"/></svg>
+    </p>
+    <p class="site-footer__note">Список желаний Алисы · 2026</p>
+  </div>
+</footer>
+
+<!-- ══════════ Модалка «Подарить» ══════════ -->
+<div class="modal" id="gift-modal" role="dialog" aria-modal="true"
+     aria-labelledby="modal-title" hidden>
+  <div class="modal__backdrop" data-close></div>
+
+  <div class="modal__panel" id="modal-panel" tabindex="-1">
+    <button type="button" class="modal__close" data-close aria-label="Закрыть окно">
+      <svg width="22" height="22" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+
+    <div class="modal__gift">
+      <svg class="modal__thumb" id="modal-thumb" viewBox="0 0 100 100" aria-hidden="true"><use href="#g-cube" id="modal-thumb-use"/></svg>
+      <div>
+        <p class="modal__eyebrow">Дарю подарок</p>
+        <h2 class="modal__title" id="modal-title">Подарок</h2>
+        <p class="modal__price" id="modal-price">—</p>
+      </div>
+    </div>
+
+    <form class="modal__form" id="gift-form" novalidate>
+      <div class="field" id="field-name">
+        <label class="field__label" for="giver-name">Как вас зовут <span class="field__req" aria-hidden="true">*</span></label>
+        <input class="field__control" type="text" id="giver-name" name="name"
+               placeholder="Например, тётя Оля" autocomplete="name"
+               required minlength="2" maxlength="60"
+               aria-describedby="err-name">
+        <p class="field__error" id="err-name" role="alert">
+          <svg width="15" height="15" aria-hidden="true"><use href="#i-alert"/></svg>
+          <span>Напишите имя — хотя бы 2 буквы</span>
+        </p>
+      </div>
+
+      <div class="field" id="field-contact">
+        <label class="field__label" for="giver-contact">Как с вами связаться <span class="opt">— необязательно</span></label>
+        <input class="field__control" type="text" id="giver-contact" name="contact"
+               placeholder="Телефон или @telegram" autocomplete="tel" maxlength="60">
+      </div>
+
+      <div class="field" id="field-note">
+        <label class="field__label" for="giver-note">Пожелание Алисе <span class="opt">— необязательно</span></label>
+        <textarea class="field__control" id="giver-note" name="note"
+                  placeholder="Пару тёплых слов имениннице" maxlength="200"></textarea>
+        <p class="field__hint">
+          <span>Мы прочитаем его вслух на празднике</span>
+          <span><span id="note-count">0</span>/200</span>
+        </p>
+      </div>
+
+      <label class="check" for="giver-secret">
+        <input type="checkbox" id="giver-secret" name="secret">
+        <span>Пусть будет сюрприз — не показывать моё имя в списке</span>
+      </label>
+
+      <p class="form__alert" id="form-error" role="alert" hidden>
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-alert"/></svg>
+        <span id="form-error-text"></span>
+      </p>
+
+      <div class="form__foot">
+        <button type="submit" class="btn btn--primary btn--block btn--lg" id="submit-btn">
+          <span class="btn__spinner" aria-hidden="true"></span>
+          <span class="btn__label">Забронировать подарок</span>
+        </button>
+        <p class="form__note">Мы никому не передаём ваши контакты</p>
+      </div>
+    </form>
+
+    <div class="modal__success" id="modal-success">
+      <svg class="success__mark" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="ring" cx="50" cy="50" r="42" fill="none" stroke="#6FC49E" stroke-width="6" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+        <path class="tick" d="M31 51.5 44 64l25-27" fill="none" stroke="#6FC49E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2 class="success__title">Спасибо!</h2>
+      <p class="success__text" id="success-text">Подарок забронирован за вами.</p>
+    </div>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- ══════════ Тост ══════════ -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg width="20" height="20" aria-hidden="true"><use href="#i-check"/></svg>
+  <span id="toast-text"></span>
+</div>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

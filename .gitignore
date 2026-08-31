@@ -1,0 +1,14 @@
+node_modules/
+.vercel/
+.data/
+.env
+.env.local
+.DS_Store
+.vercel
+.env*
+
+# В репозитории держим только финальный фон и макет главной.
+# Промежуточные варианты остаются локально, на диске.
+design/*
+!design/wishlist-alisa-illustration-background-v5-1341.png
+!design/wishlist-alisa-homepage-concept-v4.png

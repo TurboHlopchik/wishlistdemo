@@ -1,0 +1,12 @@
+{
+  "name": "alisa-wishlist",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Список желанных подарков к первому дню рождения Алисы",
+  "scripts": {
+    "dev": "node server/dev.js",
+    "start": "node server/dev.js"
+  },
+  "engines": { "node": ">=20" }
+}
