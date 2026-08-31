@@ -243,6 +243,7 @@
     $('#note-count').textContent = '0';
     setLoading(false);
     $('#confetti').innerHTML = '';
+    $('#success-actions').innerHTML = '';
 
     modal.hidden = false;
     document.body.classList.add('is-locked');
@@ -339,6 +340,33 @@
     setTimeout(function () { box.innerHTML = ''; }, 3400);
   }
 
+  /**
+   * Показывает под благодарностью ссылку на магазин, если она задана в админке.
+   * Пока ссылка на экране, окно само не закрывается — иначе её не успеть нажать.
+   */
+  function showSuccessActions(gift) {
+    var box = $('#success-actions');
+    var url = String(gift.link || '');
+    var hasLink = /^https?:\/\//i.test(url);
+
+    box.innerHTML = hasLink
+      ? '<a class="btn btn--primary success__shop" href="' + escapeHtml(url) + '" ' +
+          'target="_blank" rel="noopener noreferrer">' +
+          '<svg width="18" height="18" aria-hidden="true"><use href="#i-bag"></use></svg>' +
+          'Где купить подарок' +
+          '<svg class="success__ext" width="14" height="14" aria-hidden="true"><use href="#i-external"></use></svg>' +
+        '</a>' +
+        '<button type="button" class="success__done" data-close>Готово</button>'
+      : '';
+
+    /* форма скрыта — уводим фокус на то, что осталось видимым */
+    var next = box.querySelector('a') || $('.modal__close', panel);
+    if (next) setTimeout(function () { next.focus(); }, reduceMotion ? 0 : 240);
+
+    /* без ссылки закрываем сами, как раньше */
+    if (!hasLink) closeTimer = setTimeout(closeModal, 3200);
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     nameTouched = true;
@@ -382,8 +410,8 @@
       $('#success-text').innerHTML =
         '<b>' + escapeHtml(String(gift.title).replace(/\n/g, ' ')) +
         '</b> теперь забронирован за вами. Ждём вас на празднике!';
+      showSuccessActions(gift);
       launchConfetti();
-      closeTimer = setTimeout(closeModal, 3200);
     }).catch(function () {
       setLoading(false);
       showFormError('Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.');

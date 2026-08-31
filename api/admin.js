@@ -77,7 +77,9 @@ export default async function handler(req, res) {
           return fail(res, 400, err.message);
         }
 
-        if (existingIndex >= 0) gifts[existingIndex] = { ...gifts[existingIndex], ...gift };
+        /* заменяем запись целиком, а не сливаем со старой: при слиянии
+           очищенное поле (например, убранная ссылка) не удалялось бы */
+        if (existingIndex >= 0) gifts[existingIndex] = gift;
         else gifts.push(gift);
 
         await writeGifts(gifts);
