@@ -101,6 +101,7 @@
   $('#login-form').addEventListener('submit', function (e) {
     e.preventDefault();
     setLoginError('');
+    if (!$('#admin-password').value) { setLoginError('Введите пароль'); $('#admin-password').focus(); return; }
     var btn = $('#login-btn');
     setBusy(btn, true, 'Проверяем…', 'Войти');
 
@@ -330,6 +331,8 @@
     $('#gift-art-url').value = isExternal ? gift.art : '';
     selectArt(gift && !isExternal ? gift.art : 'g-present');
 
+    clearFieldError('#field-title');
+    clearFieldError('#field-price');
     $('#editor-delete').hidden = !gift;
     setEditorError('');
     setBusy($('#editor-save'), false, 'Сохраняем…', 'Сохранить');
@@ -337,6 +340,34 @@
   }
 
   $('#add-btn').addEventListener('click', function () { openEditor(null); });
+
+  /**
+   * Достаёт целое число рублей из того, что человек вставил из магазина.
+   * Копейки отбрасываем ОТДЕЛЬНО и до удаления разделителей — иначе
+   * «12 490,00 руб.» склеилось бы в 1 249 000.
+   */
+  function parsePrice(value) {
+    return String(value)
+      .replace(/\D+$/, '')           /* хвост вроде « ₽» или « руб.» целиком */
+      .replace(/[.,]\d{1,2}$/, '')   /* копейки */
+      .replace(/\D+/g, '');          /* пробелы и прочие разделители разрядов */
+  }
+
+  /* Из вставленного «4 990 ₽» оставляем 4990: людям удобно копировать из магазина */
+  $('#gift-price').addEventListener('input', function () {
+    var digits = parsePrice(this.value);
+    if (digits !== this.value) {
+      var atEnd = this.selectionStart === this.value.length;
+      this.value = digits;
+      if (atEnd) this.setSelectionRange(digits.length, digits.length);
+    }
+    clearFieldError('#field-price');
+  });
+
+  $('#gift-title').addEventListener('input', function () { clearFieldError('#field-title'); });
+
+  function setFieldError(sel) { $(sel).classList.add('has-error'); }
+  function clearFieldError(sel) { $(sel).classList.remove('has-error'); }
 
   $('#art-grid').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-art]');
@@ -349,10 +380,19 @@
     e.preventDefault();
     setEditorError('');
 
+    clearFieldError('#field-title');
+    clearFieldError('#field-price');
+
     var title = $('#gift-title').value.trim();
-    if (title.length < 2) { setEditorError('Название слишком короткое'); $('#gift-title').focus(); return; }
-    var price = Number($('#gift-price').value);
-    if (!Number.isFinite(price) || price < 0) { setEditorError('Проверьте цену'); $('#gift-price').focus(); return; }
+    if (title.replace(/\s/g, '').length < 2) {
+      setFieldError('#field-title'); $('#gift-title').focus(); return;
+    }
+
+    var raw = parsePrice($('#gift-price').value);
+    var price = Number(raw);
+    if (raw === '' || !Number.isFinite(price)) {
+      setFieldError('#field-price'); $('#gift-price').focus(); return;
+    }
 
     var btn = $('#editor-save');
     setBusy(btn, true, 'Сохраняем…', 'Сохранить');

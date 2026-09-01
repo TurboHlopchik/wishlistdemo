@@ -18,7 +18,7 @@
 
 <!-- ══════════ Вход ══════════ -->
 <div class="login" id="login-screen" hidden>
-  <form class="login__card" id="login-form">
+  <form class="login__card" id="login-form" novalidate>
     <svg class="login__mark" viewBox="0 0 64 64" aria-hidden="true"><use href="#brand-mark"/></svg>
     <h1 class="login__title">Управление списком</h1>
     <p class="login__sub">Страница для родителей Алисы</p>
@@ -122,7 +122,7 @@
 
     <h2 class="modal__title" id="editor-title">Новый подарок</h2>
 
-    <form id="editor-form">
+    <form id="editor-form" novalidate>
       <input type="hidden" id="gift-id">
 
       <div class="field" id="field-title">
@@ -130,12 +130,21 @@
         <textarea class="field__control field__control--title" id="gift-title" maxlength="80" rows="2"
                   required placeholder="Например, Автокресло"></textarea>
         <p class="field__hint"><span>Enter в поле переносит строку — так название красиво ляжет в две строки на карточке</span></p>
+        <p class="field__error" id="err-title" role="alert">
+          <svg width="15" height="15" aria-hidden="true"><use href="#i-alert"/></svg>
+          <span>Напишите название — хотя бы 2 буквы</span>
+        </p>
       </div>
 
       <div class="field" id="field-price">
         <label class="field__label" for="gift-price">Цена, ₽ <span class="field__req" aria-hidden="true">*</span></label>
-        <input class="field__control" type="number" id="gift-price" min="0" step="10" required
-               inputmode="numeric" placeholder="4990">
+        <input class="field__control" type="text" id="gift-price" inputmode="numeric"
+               autocomplete="off" maxlength="9" placeholder="4990" aria-describedby="err-price">
+        <p class="field__hint"><span>Можно вставить прямо из магазина — лишнее уберётся само</span></p>
+        <p class="field__error" id="err-price" role="alert">
+          <svg width="15" height="15" aria-hidden="true"><use href="#i-alert"/></svg>
+          <span>Укажите цену числом</span>
+        </p>
       </div>
 
       <div class="field">
