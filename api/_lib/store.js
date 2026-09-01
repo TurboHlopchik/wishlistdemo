@@ -148,6 +148,16 @@ export async function cancel(giftId) {
   });
 }
 
+/** Полная очистка: пустой каталог и ни одной брони. */
+export async function clearAll() {
+  if (isRemote) {
+    await redis('SET', K_GIFTS, JSON.stringify([]));
+    await redis('DEL', K_RES);
+    return true;
+  }
+  return fileWrite(d => { d.gifts = []; d.reservations = {}; return true; });
+}
+
 export async function readReservation(giftId) {
   if (isRemote) {
     const raw = await redis('HGET', K_RES, giftId);

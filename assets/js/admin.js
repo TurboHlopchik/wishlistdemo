@@ -398,6 +398,25 @@
   });
 
   /* ------------------------------------------------------------
+     Очистка всего списка
+     ------------------------------------------------------------ */
+  $('#clear-btn').addEventListener('click', function () {
+    var taken = Object.keys(reservations).length;
+    askConfirm(
+      'Удалить все подарки (' + gifts.length + ')' +
+      (taken ? ' вместе с бронями (' + taken + ')' : '') +
+      '? Список станет пустым, вернуть будет нельзя.',
+      function () {
+        api({ action: 'clear-catalog', confirm: 'ОЧИСТИТЬ' }).then(function (r) {
+          if (!r.data.ok) { showToast(r.data.error || 'Не получилось очистить', 'error'); return; }
+          apply(r.data);
+          showToast('Список очищен — можно добавлять свои подарки');
+        });
+      }
+    );
+  });
+
+  /* ------------------------------------------------------------
      Действия в списках
      ------------------------------------------------------------ */
   document.addEventListener('click', function (e) {

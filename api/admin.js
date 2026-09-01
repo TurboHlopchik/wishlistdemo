@@ -5,8 +5,9 @@
    { action: 'cancel-reservation', giftId }
    { action: 'save-gift', gift }         → добавить или изменить
    { action: 'delete-gift', id }
+   { action: 'clear-catalog', confirm: 'ОЧИСТИТЬ' }  → пустой список и ноль броней
    { action: 'reorder', ids }                                              */
-import { readGifts, writeGifts, readReservations, cancel } from './_lib/store.js';
+import { readGifts, writeGifts, readReservations, cancel, clearAll } from './_lib/store.js';
 import { normalizeGift, MAX_GIFTS } from './_lib/gifts.js';
 import { readBody, send, fail, clean } from './_lib/http.js';
 import { checkPassword, makeToken, sessionCookie, isAdmin, passwordConfigured } from './_lib/auth.js';
@@ -93,6 +94,13 @@ export default async function handler(req, res) {
         if (next.length === gifts.length) return fail(res, 404, 'Подарок не найден');
         await writeGifts(next);
         await cancel(id);   /* вместе с подарком снимаем и его бронь */
+        break;
+      }
+
+      case 'clear-catalog': {
+        /* Полная очистка списка вместе с бронями — только по явному подтверждению */
+        if (body.confirm !== 'ОЧИСТИТЬ') return fail(res, 400, 'Очистка не подтверждена');
+        await clearAll();
         break;
       }
 

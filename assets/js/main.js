@@ -16,10 +16,22 @@
   var gifts = [];        /* каталог с сервера */
   var reserved = {};     /* giftId → { by, at } */
   var myTokens = loadTokens();
-  var renderedIds = '';  /* чтобы не пересобирать сетку без надобности */
+  var renderedIds = null;   /* сигнатура отрисованного каталога; null — ещё не рисовали.
+                               Именно null, а не '': у пустого списка сигнатура тоже '',
+                               и сетка со скелетонами не пересобралась бы никогда. */
 
   var $  = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+
+  /** Русское склонение после числа: 1 идея, 2 идеи, 5 идей */
+  function plural(n, one, few, many) {
+    var mod100 = n % 100, mod10 = n % 10;
+    var word = (mod100 >= 11 && mod100 <= 14) ? many
+             : mod10 === 1 ? one
+             : (mod10 >= 2 && mod10 <= 4) ? few
+             : many;
+    return n + ' ' + word;
+  }
 
   function formatPrice(n) {
     return Number(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
@@ -159,7 +171,12 @@
 
     gifts.forEach(function (gift) { paintCard(gift, false); });
     updateProgress();
-    setStatus('');
+
+    /* подсказка под кнопкой в герое — по числу подарков, а не «20» намертво */
+    var cue = $('#hero-cue');
+    cue.hidden = gifts.length === 0;
+    $('#hero-cue-text').textContent = plural(gifts.length, 'идея', 'идеи', 'идей');
+    setStatus(gifts.length ? '' : 'Список пока пустой — мы вот-вот его наполним. Загляните чуть позже.');
   }
 
   function renderSkeletons(count) {
