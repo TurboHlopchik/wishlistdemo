@@ -31,8 +31,13 @@
   }
   function plain(title) { return String(title).replace(/\n/g, ' '); }
 
+  /** Картинка (фотография или внешняя ссылка) — в отличие от рисунка из спрайта */
+  function artIsImage(art) {
+    return /^https:\/\//i.test(art) || /^assets\/img\/gifts\//i.test(art);
+  }
+
   function thumbMarkup(gift, cls) {
-    if (/^https:\/\//i.test(gift.art)) {
+    if (artIsImage(gift.art)) {
       return '<img class="' + cls + '" src="' + escapeHtml(gift.art) + '" alt="" loading="lazy">';
     }
     var symbol = /^g-[a-z0-9-]+$/.test(gift.art || '') ? gift.art : 'g-present';
@@ -259,14 +264,39 @@
   var editing = null;
 
   function collectArt() {
-    /* все иллюстрации подарков из спрайта, в порядке появления */
-    ART = $$('symbol[id^="g-"]').map(function (s) { return s.id; });
-    var grid = $('#art-grid');
-    grid.innerHTML = ART.map(function (id) {
-      return '<button type="button" class="picker__item" role="radio" aria-checked="false" ' +
-        'data-art="' + id + '" aria-label="' + id + '">' +
-        '<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#' + id + '"></use></svg></button>';
+    /* Сначала фотографии подарков, следом рисунки из спрайта */
+    var photos = (window.GIFT_PHOTOS || []).map(function (p) {
+      return { art: 'assets/img/gifts/' + p.file, label: p.label, photo: true };
+    });
+    var drawings = $$('symbol[id^="g-"]').map(function (sym) {
+      return { art: sym.id, label: 'Рисунок ' + sym.id.replace(/^g-/, ''), photo: false };
+    });
+
+    ART = photos.concat(drawings);
+
+    $('#art-grid').innerHTML = ART.map(function (item) {
+      var inner = item.photo
+        ? '<img src="' + escapeHtml(item.art) + '" alt="" loading="lazy" decoding="async">'
+        : '<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#' + item.art + '"></use></svg>';
+      return '<button type="button" class="picker__item' + (item.photo ? ' picker__item--photo' : '') +
+        '" role="radio" aria-checked="false" data-art="' + escapeHtml(item.art) +
+        '" title="' + escapeHtml(item.label) + '" aria-label="' + escapeHtml(item.label) + '">' +
+        inner + '</button>';
     }).join('');
+
+    $('#art-count').textContent = photos.length
+      ? photos.length + ' фото и ' + plural(drawings.length, 'рисунок', 'рисунка', 'рисунков')
+      : plural(drawings.length, 'рисунок', 'рисунка', 'рисунков');
+  }
+
+  /** Русское склонение после числа: 1 рисунок, 2 рисунка, 5 рисунков */
+  function plural(n, one, few, many) {
+    var mod100 = n % 100, mod10 = n % 10;
+    var word = (mod100 >= 11 && mod100 <= 14) ? many
+             : mod10 === 1 ? one
+             : (mod10 >= 2 && mod10 <= 4) ? few
+             : many;
+    return n + ' ' + word;
   }
 
   function selectArt(id) {
@@ -295,9 +325,10 @@
     $('#gift-price').value = gift ? gift.price : '';
     $('#gift-link').value = gift && gift.link ? gift.link : '';
 
-    var isUrl = gift && /^https:\/\//i.test(gift.art);
-    $('#gift-art-url').value = isUrl ? gift.art : '';
-    selectArt(gift && !isUrl ? gift.art : 'g-present');
+    /* фотография выделяется в сетке, произвольная ссылка попадает в поле */
+    var isExternal = gift && /^https:\/\//i.test(gift.art);
+    $('#gift-art-url').value = isExternal ? gift.art : '';
+    selectArt(gift && !isExternal ? gift.art : 'g-present');
 
     $('#editor-delete').hidden = !gift;
     setEditorError('');

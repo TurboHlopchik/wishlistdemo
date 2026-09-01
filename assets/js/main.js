@@ -72,9 +72,14 @@
   var grid = $('#gift-grid');
   var statusBox = $('#gifts-status');
 
+  /** Картинка (фотография или внешняя ссылка) — в отличие от рисунка из спрайта */
+  function artIsImage(art) {
+    return /^https:\/\//i.test(art) || /^assets\/img\/gifts\//i.test(art);
+  }
+
   function artMarkup(gift, plainTitle) {
-    /* иллюстрация — либо символ из спрайта, либо https-картинка (её задают в админке) */
-    if (/^https:\/\//i.test(gift.art)) {
+    /* иллюстрация — либо символ из спрайта, либо картинка, заданная в админке */
+    if (artIsImage(gift.art)) {
       return '<img class="gift-card__art gift-card__art--photo" src="' + escapeHtml(gift.art) +
              '" alt="' + escapeHtml(plainTitle) + '" loading="lazy" decoding="async">';
     }
@@ -224,7 +229,7 @@
     clearTimeout(closeTimer);
 
     var thumb = $('#modal-thumb');
-    if (/^https:\/\//i.test(gift.art)) {
+    if (artIsImage(gift.art)) {
       thumb.outerHTML = '<img class="modal__thumb" id="modal-thumb" src="' + escapeHtml(gift.art) + '" alt="">';
     } else {
       var symbol = /^g-[a-z0-9-]+$/.test(gift.art || '') ? gift.art : 'g-present';

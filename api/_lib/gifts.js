@@ -19,11 +19,12 @@ export function normalizeGift(input, existingIds = []) {
   }
 
   const art = clean(input?.art, 300) || 'g-present';
-  /* Разрешаем только id из спрайта или https-картинку — никакого javascript: и data: */
-  const isSymbol = /^g-[a-z0-9-]+$/.test(art);
-  const isHttps  = /^https:\/\/[^\s"'<>]+$/i.test(art);
-  if (!isSymbol && !isHttps) {
-    throw new Error('Иллюстрация: выберите рисунок или дайте https-ссылку на картинку');
+  /* Три разрешённые формы, ничего больше: никаких javascript: и data: */
+  const isSymbol = /^g-[a-z0-9-]+$/.test(art);                                    /* рисунок из спрайта */
+  const isPhoto  = /^assets\/img\/gifts\/[a-z0-9._-]+\.(png|jpe?g|webp|svg)$/i.test(art); /* своя фотография */
+  const isHttps  = /^https:\/\/[^\s"'<>]+$/i.test(art);                           /* картинка со стороны */
+  if (!isSymbol && !isPhoto && !isHttps) {
+    throw new Error('Иллюстрация: выберите рисунок, фотографию или дайте https-ссылку');
   }
 
   let id = clean(input?.id, 40);

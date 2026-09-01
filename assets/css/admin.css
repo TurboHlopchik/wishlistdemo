@@ -297,3 +297,15 @@
   line-height: 1.35;
   font-family: "Fredoka", "Nunito", sans-serif;
 }
+
+/* Фотографии в сетке выбора: крупнее рисунков и на своей подложке */
+.picker__grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.picker__item--photo {
+  background: linear-gradient(160deg, #FFFCF8, #FDF2EB);
+  padding: 3px;
+}
+.picker__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
