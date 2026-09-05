@@ -301,9 +301,14 @@
   }
 
   function selectArt(id) {
+    var chosen = null;
     $$('.picker__item').forEach(function (b) {
-      b.setAttribute('aria-checked', String(b.dataset.art === id));
+      var on = b.dataset.art === id;
+      b.setAttribute('aria-checked', String(on));
+      if (on) chosen = b;
     });
+    /* вариантов много, выбранный легко оказывается вне видимой части сетки */
+    if (chosen) chosen.scrollIntoView({ block: 'nearest' });
   }
 
   function currentArt() {
