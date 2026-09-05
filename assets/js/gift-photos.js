@@ -38,6 +38,11 @@ window.GIFT_PHOTOS = [
   { file: 'plush-bunny.png',              label: 'Плюшевый зайка' },
   { file: 'plush-fox.png',                label: 'Плюшевый лисёнок' },
   { file: 'plush-elephant.png',           label: 'Плюшевый слоник' },
+
+  /* Для ванны */
+  { file: 'rubber-ducks-set.png',         label: 'Резиновые уточки' },
+  { file: 'flower-bath-toy.png',          label: 'Цветок с лейкой' },
+  { file: 'bath-ice-cream-maker.png',     label: 'Мороженое для ванны' },
   { file: 'fox-bath-toy.png',             label: 'Лисёнок для ванны' },
 
   /* Для кормления */
