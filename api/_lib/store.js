@@ -5,6 +5,7 @@
    Ключи (префикс задаёт KEY_PREFIX, по умолчанию wishlist):
      <prefix>:gifts  → JSON-массив каталога подарков
      <prefix>:res    → HASH: giftId → JSON брони
+     <prefix>:res:<сессия> → то же, но для одной браузерной сессии демо (см. demo.js)
    ============================================================ */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -30,6 +31,15 @@ export const isRemote = Boolean(REST_URL && REST_TOKEN);
 const PREFIX  = process.env.KEY_PREFIX || 'wishlist';
 const K_GIFTS = `${PREFIX}:gifts`;
 const K_RES   = `${PREFIX}:res`;
+const SESSION_TTL_SEC = 24 * 60 * 60;   /* брони демо-сессии живут сутки */
+
+/* scope — id демо-сессии; без него брони общие, как на обычном сайте */
+function resKey(scope) { return scope ? `${K_RES}:${scope}` : K_RES; }
+function fileRes(db, scope) {
+  if (!scope) return (db.reservations ||= {});
+  db.sessionReservations ||= {};
+  return (db.sessionReservations[scope] ||= {});
+}
 
 /* ---------- Redis через REST ---------- */
 async function redis(...command) {
@@ -108,9 +118,9 @@ export async function writeGifts(gifts) {
 /* ============================================================
    Брони
    ============================================================ */
-export async function readReservations() {
+export async function readReservations(scope) {
   if (isRemote) {
-    const flat = await redis('HGETALL', K_RES);
+    const flat = await redis('HGETALL', resKey(scope));
     const out = {};
     if (Array.isArray(flat)) {
       /* HGETALL приходит плоским списком: field, value, field, value… */
@@ -125,34 +135,36 @@ export async function readReservations() {
     return out;
   }
   const db = await fileRead();
-  return db.reservations || {};
+  return fileRes(db, scope);
 }
 
 /**
  * Атомарно занимает подарок. Возвращает true, если бронь поставлена,
  * и false — если кто-то успел раньше. Гонки двух гостей исключены.
  */
-export async function reserve(giftId, payload) {
+export async function reserve(giftId, payload, scope) {
   if (isRemote) {
-    const ok = await redis('HSETNX', K_RES, giftId, JSON.stringify(payload));
+    const ok = await redis('HSETNX', resKey(scope), giftId, JSON.stringify(payload));
+    if (scope) await redis('EXPIRE', resKey(scope), SESSION_TTL_SEC);
     return ok === 1;
   }
   return fileWrite(d => {
-    d.reservations = d.reservations || {};
-    if (d.reservations[giftId]) return false;
-    d.reservations[giftId] = payload;
+    const r = fileRes(d, scope);
+    if (r[giftId]) return false;
+    r[giftId] = payload;
     return true;
   });
 }
 
-export async function cancel(giftId) {
+export async function cancel(giftId, scope) {
   if (isRemote) {
-    const removed = await redis('HDEL', K_RES, giftId);
+    const removed = await redis('HDEL', resKey(scope), giftId);
     return removed === 1;
   }
   return fileWrite(d => {
-    if (!d.reservations || !d.reservations[giftId]) return false;
-    delete d.reservations[giftId];
+    const r = fileRes(d, scope);
+    if (!r[giftId]) return false;
+    delete r[giftId];
     return true;
   });
 }
@@ -167,12 +179,12 @@ export async function clearAll() {
   return fileWrite(d => { d.gifts = []; d.reservations = {}; return true; });
 }
 
-export async function readReservation(giftId) {
+export async function readReservation(giftId, scope) {
   if (isRemote) {
-    const raw = await redis('HGET', K_RES, giftId);
+    const raw = await redis('HGET', resKey(scope), giftId);
     if (!raw) return null;
     try { return typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { return null; }
   }
   const db = await fileRead();
-  return (db.reservations || {})[giftId] || null;
+  return fileRes(db, scope)[giftId] || null;
 }

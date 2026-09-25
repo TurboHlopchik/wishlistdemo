@@ -6,9 +6,10 @@ import { readGifts, readReservation, reserve, cancel } from './_lib/store.js';
 import { publicReservations } from './_lib/gifts.js';
 import { readBody, send, fail, clean } from './_lib/http.js';
 import { readReservations } from './_lib/store.js';
+import { reservationScope } from './_lib/demo.js';
 
-async function publicState() {
-  const [gifts, reservations] = await Promise.all([readGifts(), readReservations()]);
+async function publicState(scope) {
+  const [gifts, reservations] = await Promise.all([readGifts(), readReservations(scope)]);
   return { gifts, reserved: publicReservations(reservations) };
 }
 
@@ -22,22 +23,23 @@ export default async function handler(req, res) {
   const giftId = clean(body.giftId, 40);
   if (!giftId) return fail(res, 400, 'Не указан подарок');
 
+  const scope = reservationScope(req, res);
   try {
     const gifts = await readGifts();
     if (!gifts.some(g => g.id === giftId)) return fail(res, 404, 'Такого подарка больше нет в списке');
 
     /* ---------- отмена своей брони ---------- */
     if (body.action === 'cancel') {
-      const current = await readReservation(giftId);
-      if (!current) return send(res, 200, { ok: true, ...(await publicState()) });
+      const current = await readReservation(giftId, scope);
+      if (!current) return send(res, 200, { ok: true, ...(await publicState(scope)) });
 
       const given = clean(body.token, 80);
       /* Отменить может только тот, кто бронировал — по выданному ему токену */
       if (!given || given !== current.token) {
         return fail(res, 403, 'Эту бронь оформляли не с этого устройства');
       }
-      await cancel(giftId);
-      return send(res, 200, { ok: true, ...(await publicState()) });
+      await cancel(giftId, scope);
+      return send(res, 200, { ok: true, ...(await publicState(scope)) });
     }
 
     /* ---------- бронирование ---------- */
@@ -54,17 +56,17 @@ export default async function handler(req, res) {
       token
     };
 
-    const won = await reserve(giftId, payload);
+    const won = await reserve(giftId, payload, scope);
     if (!won) {
       /* кто-то успел за доли секунды до нас */
       return send(res, 409, {
         ok: false,
         error: 'Этот подарок только что забронировали. Выберите, пожалуйста, другой.',
-        ...(await publicState())
+        ...(await publicState(scope))
       });
     }
 
-    return send(res, 200, { ok: true, token, ...(await publicState()) });
+    return send(res, 200, { ok: true, token, ...(await publicState(scope)) });
   } catch (err) {
     console.error('reserve:', err);
     return fail(res, 500, 'Не получилось сохранить бронь, попробуйте ещё раз');

@@ -10,6 +10,7 @@
 import { readGifts, writeGifts, readReservations, cancel, clearAll } from './_lib/store.js';
 import { normalizeGift, MAX_GIFTS } from './_lib/gifts.js';
 import { readBody, send, fail, clean } from './_lib/http.js';
+import { reservationScope } from './_lib/demo.js';
 import { checkPassword, makeToken, sessionCookie, isAdmin, passwordConfigured } from './_lib/auth.js';
 
 export default async function handler(req, res) {
@@ -41,10 +42,13 @@ export default async function handler(req, res) {
   /* ---------- дальше только для админа ---------- */
   if (!isAdmin(req)) return fail(res, 401, 'Нужно войти');
 
+  /* в демо админ видит брони только своей браузерной сессии */
+  const scope = reservationScope(req, res);
+
   try {
     switch (action) {
       case 'data': {
-        const [gifts, reservations] = await Promise.all([readGifts(), readReservations()]);
+        const [gifts, reservations] = await Promise.all([readGifts(), readReservations(scope)]);
         /* токен отмены наружу не отдаём — он личный для гостя */
         const safe = {};
         for (const [id, r] of Object.entries(reservations)) {
@@ -57,7 +61,7 @@ export default async function handler(req, res) {
       case 'cancel-reservation': {
         const giftId = clean(body.giftId, 40);
         if (!giftId) return fail(res, 400, 'Не указан подарок');
-        await cancel(giftId);
+        await cancel(giftId, scope);
         break;
       }
 
@@ -93,7 +97,7 @@ export default async function handler(req, res) {
         const next = gifts.filter(g => g.id !== id);
         if (next.length === gifts.length) return fail(res, 404, 'Подарок не найден');
         await writeGifts(next);
-        await cancel(id);   /* вместе с подарком снимаем и его бронь */
+        await cancel(id, scope);   /* вместе с подарком снимаем и его бронь */
         break;
       }
 
@@ -119,7 +123,7 @@ export default async function handler(req, res) {
         return fail(res, 400, 'Неизвестное действие');
     }
 
-    const [gifts, reservations] = await Promise.all([readGifts(), readReservations()]);
+    const [gifts, reservations] = await Promise.all([readGifts(), readReservations(scope)]);
     const safe = {};
     for (const [id, r] of Object.entries(reservations)) {
       const { token, ...rest } = r;

@@ -40,7 +40,7 @@ export function verifyToken(token) {
   return safeEqual(sig, hmac(expires));
 }
 
-function parseCookies(header) {
+export function parseCookies(header) {
   const out = {};
   if (!header) return out;
   for (const part of header.split(';')) {
