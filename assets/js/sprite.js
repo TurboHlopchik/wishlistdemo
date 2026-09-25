@@ -40,7 +40,7 @@
   <path d="M6 34c-3-6 1-13 7-14 2 5-1 12-7 14Z" fill="#A9C6A0"/>
   <path d="M58 34c3-6-1-13-7-14-2 5 1 12 7 14Z" fill="#A9C6A0"/>
   <circle cx="32" cy="32" r="19" fill="#FDF3E7"/>
-  <text x="32" y="41" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="24" font-weight="600" fill="#F2867E">А</text>
+  <text x="32" y="41" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="24" font-weight="600" fill="#F2867E">С</text>
 </symbol>
 
 <!-- ── Floating hero decorations ── -->
