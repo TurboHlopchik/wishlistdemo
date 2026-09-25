@@ -2,9 +2,9 @@
    Хранилище: Upstash Redis (прод) или локальный JSON-файл (разработка).
    Зависимостей нет — с Upstash общаемся его REST API через fetch.
 
-   Ключи:
-     wishlist:gifts  → JSON-массив каталога подарков
-     wishlist:res    → HASH: giftId → JSON брони
+   Ключи (префикс задаёт KEY_PREFIX, по умолчанию wishlist):
+     <prefix>:gifts  → JSON-массив каталога подарков
+     <prefix>:res    → HASH: giftId → JSON брони
    ============================================================ */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -19,8 +19,10 @@ const REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_RE
 
 export const isRemote = Boolean(REST_URL && REST_TOKEN);
 
-const K_GIFTS = 'wishlist:gifts';
-const K_RES   = 'wishlist:res';
+/* Префикс ключей: позволяет нескольким сайтам жить в одной базе Redis */
+const PREFIX  = process.env.KEY_PREFIX || 'wishlist';
+const K_GIFTS = `${PREFIX}:gifts`;
+const K_RES   = `${PREFIX}:res`;
 
 /* ---------- Redis через REST ---------- */
 async function redis(...command) {
