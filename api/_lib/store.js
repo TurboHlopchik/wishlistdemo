@@ -13,9 +13,16 @@ import { SEED_GIFTS } from './seed.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-/* Vercel Marketplace прокидывает KV_*, Upstash напрямую — UPSTASH_* */
-const REST_URL   = process.env.KV_REST_API_URL   || process.env.UPSTASH_REDIS_REST_URL   || '';
-const REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '';
+/* Vercel Marketplace прокидывает KV_* (при подключении базы можно задать
+   свой префикс, например demo_KV_*), Upstash напрямую — UPSTASH_* */
+function envBySuffix(suffix) {
+  const key = Object.keys(process.env).find(k => k.endsWith('_' + suffix));
+  return key ? process.env[key] : '';
+}
+const REST_URL   = process.env.KV_REST_API_URL   || process.env.UPSTASH_REDIS_REST_URL
+                || envBySuffix('KV_REST_API_URL')   || '';
+const REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+                || envBySuffix('KV_REST_API_TOKEN') || '';
 
 export const isRemote = Boolean(REST_URL && REST_TOKEN);
 
