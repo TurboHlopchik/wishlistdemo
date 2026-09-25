@@ -1,9 +1,9 @@
 {
-  "name": "alisa-wishlist",
+  "name": "wishlist-demo",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Список желанных подарков к первому дню рождения Алисы",
+  "description": "Список желанных подарков Демо-сайт: список желанных подарков ко дню рождения ребёнка",
   "scripts": {
     "dev": "node server/dev.js",
     "start": "node server/dev.js"
