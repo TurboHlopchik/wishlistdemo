@@ -2,13 +2,13 @@
 import { readGifts, readReservations } from './_lib/store.js';
 import { publicReservations } from './_lib/gifts.js';
 import { send, fail } from './_lib/http.js';
-import { reservationScope } from './_lib/demo.js';
+import { sessionScope } from './_lib/demo.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'Только GET');
-  const scope = reservationScope(req, res);
+  const scope = sessionScope(req, res);
   try {
-    const [gifts, reservations] = await Promise.all([readGifts(), readReservations(scope)]);
+    const [gifts, reservations] = await Promise.all([readGifts(scope), readReservations(scope)]);
     return send(res, 200, {
       ok: true,
       gifts,

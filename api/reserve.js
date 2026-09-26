@@ -6,10 +6,10 @@ import { readGifts, readReservation, reserve, cancel } from './_lib/store.js';
 import { publicReservations } from './_lib/gifts.js';
 import { readBody, send, fail, clean } from './_lib/http.js';
 import { readReservations } from './_lib/store.js';
-import { reservationScope } from './_lib/demo.js';
+import { sessionScope } from './_lib/demo.js';
 
 async function publicState(scope) {
-  const [gifts, reservations] = await Promise.all([readGifts(), readReservations(scope)]);
+  const [gifts, reservations] = await Promise.all([readGifts(scope), readReservations(scope)]);
   return { gifts, reserved: publicReservations(reservations) };
 }
 
@@ -23,9 +23,9 @@ export default async function handler(req, res) {
   const giftId = clean(body.giftId, 40);
   if (!giftId) return fail(res, 400, 'Не указан подарок');
 
-  const scope = reservationScope(req, res);
+  const scope = sessionScope(req, res);
   try {
-    const gifts = await readGifts();
+    const gifts = await readGifts(scope);
     if (!gifts.some(g => g.id === giftId)) return fail(res, 404, 'Такого подарка больше нет в списке');
 
     /* ---------- отмена своей брони ---------- */

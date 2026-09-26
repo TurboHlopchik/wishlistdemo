@@ -5,7 +5,8 @@
    Ключи (префикс задаёт KEY_PREFIX, по умолчанию wishlist):
      <prefix>:gifts  → JSON-массив каталога подарков
      <prefix>:res    → HASH: giftId → JSON брони
-     <prefix>:res:<сессия> → то же, но для одной браузерной сессии демо (см. demo.js)
+     <prefix>:gifts:<сессия>, <prefix>:res:<сессия> → то же для одной браузерной
+                     сессии демо (см. demo.js); общий каталог служит шаблоном
    ============================================================ */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -33,8 +34,15 @@ const K_GIFTS = `${PREFIX}:gifts`;
 const K_RES   = `${PREFIX}:res`;
 const SESSION_TTL_SEC = 24 * 60 * 60;   /* брони демо-сессии живут сутки */
 
-/* scope — id демо-сессии; без него брони общие, как на обычном сайте */
-function resKey(scope) { return scope ? `${K_RES}:${scope}` : K_RES; }
+/* scope — id демо-сессии; без него данные общие, как на обычном сайте */
+function resKey(scope)   { return scope ? `${K_RES}:${scope}` : K_RES; }
+function giftsKey(scope) { return scope ? `${K_GIFTS}:${scope}` : K_GIFTS; }
+
+/* Любая запись в сессию продлевает жизнь обоим её ключам */
+async function touchSession(scope) {
+  await redis('EXPIRE', giftsKey(scope), SESSION_TTL_SEC);
+  await redis('EXPIRE', resKey(scope), SESSION_TTL_SEC);
+}
 function fileRes(db, scope) {
   if (!scope) return (db.reservations ||= {});
   db.sessionReservations ||= {};
@@ -92,7 +100,18 @@ function seedGifts() {
   return SEED_GIFTS.map(g => ({ ...g }));
 }
 
-export async function readGifts() {
+/* Сессия, которая ещё ничего не меняла, видит общий каталог */
+export async function readGifts(scope) {
+  if (scope) {
+    if (isRemote) {
+      const raw = await redis('GET', giftsKey(scope));
+      if (raw) return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } else {
+      const own = (await fileRead()).sessionGifts?.[scope];
+      if (own) return own;
+    }
+    return readGifts();
+  }
   if (isRemote) {
     const raw = await redis('GET', K_GIFTS);
     if (raw) return typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -107,12 +126,17 @@ export async function readGifts() {
   return seed;
 }
 
-export async function writeGifts(gifts) {
+export async function writeGifts(gifts, scope) {
   if (isRemote) {
-    await redis('SET', K_GIFTS, JSON.stringify(gifts));
+    await redis('SET', giftsKey(scope), JSON.stringify(gifts));
+    if (scope) await touchSession(scope);
     return gifts;
   }
-  return fileWrite(d => { d.gifts = gifts; return gifts; });
+  return fileWrite(d => {
+    if (scope) (d.sessionGifts ||= {})[scope] = gifts;
+    else d.gifts = gifts;
+    return gifts;
+  });
 }
 
 /* ============================================================
@@ -145,7 +169,7 @@ export async function readReservations(scope) {
 export async function reserve(giftId, payload, scope) {
   if (isRemote) {
     const ok = await redis('HSETNX', resKey(scope), giftId, JSON.stringify(payload));
-    if (scope) await redis('EXPIRE', resKey(scope), SESSION_TTL_SEC);
+    if (scope) await touchSession(scope);
     return ok === 1;
   }
   return fileWrite(d => {
@@ -170,13 +194,23 @@ export async function cancel(giftId, scope) {
 }
 
 /** Полная очистка: пустой каталог и ни одной брони. */
-export async function clearAll() {
+export async function clearAll(scope) {
   if (isRemote) {
-    await redis('SET', K_GIFTS, JSON.stringify([]));
-    await redis('DEL', K_RES);
+    await redis('SET', giftsKey(scope), JSON.stringify([]));
+    await redis('DEL', resKey(scope));
+    if (scope) await touchSession(scope);
     return true;
   }
-  return fileWrite(d => { d.gifts = []; d.reservations = {}; return true; });
+  return fileWrite(d => {
+    if (scope) {
+      (d.sessionGifts ||= {})[scope] = [];
+      if (d.sessionReservations) delete d.sessionReservations[scope];
+    } else {
+      d.gifts = [];
+      d.reservations = {};
+    }
+    return true;
+  });
 }
 
 export async function readReservation(giftId, scope) {
